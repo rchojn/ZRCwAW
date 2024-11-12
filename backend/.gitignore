@@ -31,3 +31,7 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Postman test set ###
+
+**/src/test/resources/*.postman_collection
