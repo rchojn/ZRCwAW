@@ -6,6 +6,7 @@ import com.pwr.project.dto.LoginDTO;
 import com.pwr.project.dto.RegisterDTO;
 import com.pwr.project.entities.User;
 import com.pwr.project.exceptions.InvalidJWTException;
+import com.pwr.project.repositories.UserRepository;
 import com.pwr.project.services.AuthService;
 
 import jakarta.validation.Valid;
@@ -16,6 +17,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -29,6 +32,9 @@ public class AuthController {
 
     @Autowired
     private TokenProvider tokenProvider;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody @Valid RegisterDTO registerDTO) throws InvalidJWTException {
@@ -48,6 +54,11 @@ public class AuthController {
     public ResponseEntity<User> getCurrentUser() {
         User currentUser = authService.getCurrentUser();
         return ResponseEntity.ok(currentUser);
+    }
+    @GetMapping("/users")
+    public ResponseEntity<List<User>> getAllUsers() {
+        List <User> users = userRepository.findAll();
+        return ResponseEntity.ok(users);
     }
 
 }
