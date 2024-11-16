@@ -13,12 +13,21 @@ COPY src ./src
 # Build application
 RUN mvn clean package -DskipTests
 
+# List target directory contents for debugging
+RUN ls -la target/
+
 # Production stage
 FROM eclipse-temurin:17-jre-alpine
 
 WORKDIR /app
 
 # Copy built jar from builder stage
-COPY --from=builder /app/target/*.jar project-0.0.1-SNAPSHOT.jar
+COPY --from=builder /app/target/*.jar app.jar
+
+# Add shell for debugging and maintenance
+RUN apk add --no-cache bash
+
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "project-0.0.1-SNAPSHOT.jar"]
+
+# Use shell form of ENTRYPOINT for better variable expansion and shell features
+ENTRYPOINT exec java -jar app.jar

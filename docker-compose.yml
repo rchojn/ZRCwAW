@@ -4,31 +4,21 @@ services:
   frontend:
     build:
       context: ./frontend
-    image: node:latest
     container_name: angular-frontend
-    working_dir: /app
-    volumes:
-      - ./frontend:/app
     ports:
       - "4200:4200"
-    command: >
-      bash -c "npm install && ng serve --host 0.0.0.0"
     depends_on:
       - backend
 
   backend:
     build:
       context: ./backend
-    image: openjdk:17-jdk-slim
     container_name: spring-backend
-    working_dir: /app
-    volumes:
-      - ./backend:/app
     ports:
       - "8080:8080"
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/notices_board
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://host.docker.internal:5432/notices_board
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=221001
-    command: >
-      ./mvnw spring-boot:run
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
