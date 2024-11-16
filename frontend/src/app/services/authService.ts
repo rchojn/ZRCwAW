@@ -51,8 +51,8 @@ export class AuthService {
   getCurrentUser(): Observable<User> {
     return this.http.get<User>(`${authApiPrefix}/current-user`, { headers: this.getAuthHeaders() });
   }
-  getAllUsers(): Observable<User> {
-    return this.http.get<User>(`${authApiPrefix}/users`, { headers: this.getAuthHeaders() });
+  getAllUsers(): Observable<User[]> {
+    return this.http.get<User[]>(`${authApiPrefix}/users`, { headers: this.getAuthHeaders() });
   }
 
 }
