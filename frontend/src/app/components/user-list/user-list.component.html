@@ -1,1 +1,15 @@
-<p>user-list works!</p>
+<div class = "users.container">
+    <h2>Lista użytkowników</h2>
+    <div class = "user.list">
+        <div class = "user.cart" *ngFor = "let user for users">
+            <div class = "user.info">
+                <p>
+                    Imię: {{user.firstName}}
+                </p>
+                <p>
+                    Nazwisko: {{user.surname}}
+                </p>
+            </div>
+        </div>
+    </div>
+</div>

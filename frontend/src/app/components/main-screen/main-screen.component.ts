@@ -137,4 +137,8 @@ export class MainScreenComponent implements OnInit {
         return status;
     }
   }
+
+  showUsers() {
+    this.router.navigate(["/users"]);
+  }
 }
