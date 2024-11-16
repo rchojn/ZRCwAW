@@ -1,15 +1,11 @@
-<div class = "usersContainer">
-    <h2>Lista użytkowników</h2>
-    <div class = "userList">
-        <div class = "userCart" *ngFor = "let user for users">
-            <div class = "userInfo">
-                <p>
-                    Imię: {{user.firstName}}
-                </p>
-                <p>
-                    Nazwisko: {{user.surname}}
-                </p>
-            </div>
-        </div>
+<div class="usersContainer">
+  <h2>Lista użytkowników</h2>
+  <div class="userList">
+    <div class="userCart" *ngFor="let user of users">
+      <div class="userInfo">
+        <p>Imię: {{ user.firstName }}</p>
+        <p>Nazwisko: {{ user.surname }}</p>
+      </div>
     </div>
+  </div>
 </div>
