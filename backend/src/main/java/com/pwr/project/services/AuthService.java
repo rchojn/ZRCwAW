@@ -60,7 +60,7 @@ public class AuthService implements UserDetailsService {
         }
     }
 
-    public JwtDTO login(LoginDTO loginDTO) {
+    public JwtDTO login(LoginDTO loginDTO) throws InvalidJWTException {
         try {
             AdminInitiateAuthRequest authRequest = new AdminInitiateAuthRequest()
                     .withAuthFlow(AuthFlowType.ADMIN_NO_SRP_AUTH)
@@ -75,9 +75,10 @@ public class AuthService implements UserDetailsService {
             return new JwtDTO(result.getAuthenticationResult().getIdToken());
 
         } catch (AWSCognitoIdentityProviderException e) {
-            throw new InvalidJWTException("Error while creating user in Cognito " + e.getMessage());
+            throw new InvalidJWTException("Error while logging user in Cognito " + e.getMessage());
         }
     }
+
 
     public User getCurrentUser() {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
