@@ -40,7 +40,11 @@ public class AuthService implements UserDetailsService {
     public UserDetails loadUserByUsername(String login){
         return userRepository.findByLogin(login);
     }
+    //toDo : ustawienie stałego hasła
     public void register(RegisterDTO registerDTO) throws InvalidJWTException {
+        if (userRepository.findByLogin(registerDTO.login()) != null){
+            throw new InvalidJWTException("Username already exists");
+        }
         try {
             AdminCreateUserRequest request = new AdminCreateUserRequest()
                     .withUserPoolId(userPoolId)
@@ -51,15 +55,16 @@ public class AuthService implements UserDetailsService {
                             new AttributeType().withName("family_name").withValue(registerDTO.surname()),
                             new AttributeType().withName("custom:isSeller").withValue(registerDTO.isSeller().toString())
                     )
+                    .withMessageAction("SUPPRESS")
                     .withTemporaryPassword(registerDTO.password());
 
             cognitoClient.adminCreateUser(request);
-
+            User newUser = new User(registerDTO.firstname(), registerDTO.surname(),registerDTO.login(), "", registerDTO.isSeller());
+            userRepository.save(newUser);
         } catch (AWSCognitoIdentityProviderException e) {
             throw new InvalidJWTException("Error while creating user in Cognito " + e.getMessage());
         }
     }
-
     public JwtDTO login(LoginDTO loginDTO) throws InvalidJWTException {
         try {
             AdminInitiateAuthRequest authRequest = new AdminInitiateAuthRequest()
