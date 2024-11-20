@@ -7,7 +7,16 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideToastr } from 'ngx-toastr';
+import { Amplify } from 'aws-amplify';
 
+Amplify.configure({
+  Auth: {
+    Cognito: {
+      userPoolId: 'us-east-1_OMPIqfVaW',
+      userPoolClientId: '59idbtnj82biv9ii6n6n8rhb2t'
+    }
+  }
+});
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes),
