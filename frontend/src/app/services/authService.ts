@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { BehaviorSubject, from, map, Observable, of, switchMap } from 'rxjs';
+import {BehaviorSubject, catchError, from, map, Observable, of, switchMap, throwError} from 'rxjs';
 import { User } from '../models/user';
-import { signIn, signOut, getCurrentUser, AuthUser, fetchAuthSession, SignInOutput } from '@aws-amplify/auth';
+import { signUp, signIn, signOut, getCurrentUser, AuthUser, fetchAuthSession, SignInOutput } from '@aws-amplify/auth';
 
 
 const authApiPrefix = 'http://localhost:8080/api/auth';
@@ -40,17 +40,20 @@ export class AuthService {
     );
   }
 
-  async logout(){
-    try{
-      await signOut();
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('idToken');
-    } catch (error){
-      console.error('Error siging out:', error);
-      throw error;
-    }
+  logout(): Observable<void> {
+    return from(signOut()).pipe(
+      map(() => {
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('idToken');
+      }),
+      catchError((error) => {
+        console.error('Error signing out:', error);
+        return throwError(() => error);
+      })
+    );
   }
-  
+
+
   async isAuthenticated(): Promise<boolean> {
     try{
       const user = await getCurrentUser();
@@ -70,17 +73,33 @@ export class AuthService {
     return localStorage.getItem('idToken');
   }
 
-
-  // register(firstname: string, surname: string, login: string, password: string, isSeller: boolean): Observable<User> {
-  //   return this.http.post<User>(`${authApiPrefix}/register`, { firstname, surname, login, password, isSeller })
+  // register(email: string, password: string, additionalAttributes?: { [key: string]: any }): Observable<AuthUser> {
+  //   return from(signUp({
+  //     username: email,
+  //     password: password,
+  //     attributes: additionalAttributes
+  //   })).pipe(
+  //     map((result) => {
+  //       console.log('User registered successfully:', result);
+  //       return result.user;
+  //     }),
+  //     catchError((error) => {
+  //       console.error('Registration error:', error);
+  //       return throwError(() => error);
+  //     })
+  //   );
   // }
 
-  // getAuthHeaders(): HttpHeaders {
-  //   const accessToken = this.getAccessToken();
-  //   return new HttpHeaders({
-  //     'Authorization': `Bearer ${accessToken}`
-  //   });
-  // }
+  register(firstname: string, surname: string, login: string, password: string, isSeller: boolean): Observable<User> {
+    return this.http.post<User>(`${authApiPrefix}/register`, { firstname, surname, login, password, isSeller })
+  }
+
+  getAuthHeaders(): HttpHeaders {
+    const accessToken = this.getAccessToken();
+    return new HttpHeaders({
+      'Authorization': `Bearer ${accessToken}`
+    });
+  }
 
   // logout(): Observable<void> {
   //   localStorage.removeItem('accessToken');
@@ -94,11 +113,11 @@ export class AuthService {
   //   return null;
   // }
 
-  // getCurrentUser(): Observable<User> {
-  //   return this.http.get<User>(`${authApiPrefix}/current-user`, { headers: this.getAuthHeaders() });
-  // }
-  // getAllUsers(): Observable<User[]> {
-  //   return this.http.get<User[]>(`${authApiPrefix}/users`, { headers: this.getAuthHeaders() });
-  // }
+  getCurrentUser(): Observable<User> {
+    return this.http.get<User>(`${authApiPrefix}/current-user`, { headers: this.getAuthHeaders() });
+  }
+  getAllUsers(): Observable<User[]> {
+    return this.http.get<User[]>(`${authApiPrefix}/users`, { headers: this.getAuthHeaders() });
+  }
 
 }
