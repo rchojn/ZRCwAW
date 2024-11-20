@@ -33,6 +33,7 @@ export class AuthService {
           const session = await fetchAuthSession();
           if (session.tokens){
             localStorage.setItem('accessToken', session.tokens.accessToken.toString());
+            // @ts-ignore
             localStorage.setItem('idToken', session.tokens.idToken.toString());
           }
         return result;
