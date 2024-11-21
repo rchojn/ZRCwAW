@@ -59,7 +59,7 @@ public class AuthController {
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/users")
     public ResponseEntity<List<User>> getAllUsers() {
-        List <User> users = userRepository.findAll();
+        List <User> users = authService.getAllUsers();
         return ResponseEntity.ok(users);
     }
 

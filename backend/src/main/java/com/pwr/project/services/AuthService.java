@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class AuthService implements UserDetailsService {
@@ -60,6 +61,7 @@ public class AuthService implements UserDetailsService {
 
             cognitoClient.adminCreateUser(request);
             User newUser = new User(registerDTO.firstname(), registerDTO.surname(),registerDTO.login(), "", registerDTO.isSeller());
+            System.out.println("Saving user to database: " + newUser);
             userRepository.save(newUser);
         } catch (AWSCognitoIdentityProviderException e) {
             throw new InvalidJWTException("Error while creating user in Cognito " + e.getMessage());
@@ -96,4 +98,35 @@ public class AuthService implements UserDetailsService {
         throw new IllegalStateException("Current user is not authenticated");
     }
 
+    public List<User> getAllUsers() {
+        ListUsersRequest request = new ListUsersRequest()
+                .withUserPoolId(userPoolId);
+        ListUsersResult result = cognitoClient.listUsers(request);
+
+        return result.getUsers().stream().map(user -> {
+            String username = user.getUsername();
+            String email = user.getAttributes().stream()
+                    .filter(attr -> "email".equals(attr.getName()))
+                    .findFirst()
+                    .map(AttributeType::getValue)
+                    .orElse(null);
+            String givenName = user.getAttributes().stream()
+                    .filter(attr -> "given_name".equals(attr.getName()))
+                    .findFirst()
+                    .map(AttributeType::getValue)
+                    .orElse(null);
+            String familyName = user.getAttributes().stream()
+                    .filter(attr -> "family_name".equals(attr.getName()))
+                    .findFirst()
+                    .map(AttributeType::getValue)
+                    .orElse(null);
+            Boolean isSeller = user.getAttributes().stream()
+                    .filter(attr -> "custom:isSeller".equals(attr.getName()))
+                    .findFirst()
+                    .map(attr -> Boolean.valueOf(attr.getValue()))
+                    .orElse(false);
+
+            return new User(givenName, familyName, username, "", isSeller);
+        }).collect(Collectors.toList());
+    }
 }

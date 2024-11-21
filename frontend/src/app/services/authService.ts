@@ -66,12 +66,18 @@ export class AuthService {
 
 
   getAccessToken(): string | null {
-    return localStorage.getItem('accessToken');
+    if (typeof window !== 'undefined' && window.localStorage) {
+      return localStorage.getItem('accessToken');
+    }
+    return null;
   }
 
 
   getIdToken(): string | null {
-    return localStorage.getItem('idToken');
+    if (typeof window !== 'undefined' && window.localStorage) {
+      return localStorage.getItem('idToken');
+    }
+    return null;
   }
 
   // register(email: string, password: string, additionalAttributes?: { [key: string]: any }): Observable<AuthUser> {
@@ -93,19 +99,20 @@ export class AuthService {
 
   register(firstname: string, surname: string, login: string, password: string, isSeller: boolean): Observable<any>{
     return from(signUp({
-      username: login, 
-      password, 
+      username: login,
+      password,
       options: {
           userAttributes: {
-          email: login, 
+          email: login,
           'given_name': firstname,
-          'family_name': surname, 
+          'family_name': surname,
           'custom:isSeller': isSeller.toString()
         }
       }
     })).pipe(
       map((result) => {
         console.log('User register successfully:', result);
+        console.log('type isSeller: ', typeof(isSeller))
         return result;
       }),
       catchError((error) =>{
@@ -115,7 +122,7 @@ export class AuthService {
     );
   }
 
-  
+
   // register(firstname: string, surname: string, login: string, password: string, isSeller: boolean): Observable<User> {
   //   return this.http.post<User>(`${authApiPrefix}/register`, { firstname, surname, login, password, isSeller })
   // }
