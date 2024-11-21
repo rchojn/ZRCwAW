@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import {BehaviorSubject, catchError, from, map, Observable, of, switchMap, throwError} from 'rxjs';
+import {BehaviorSubject, catchError, first, from, map, Observable, of, switchMap, throwError} from 'rxjs';
 import { User } from '../models/user';
-import { signUp, signIn, signOut, getCurrentUser, AuthUser, fetchAuthSession, SignInOutput } from '@aws-amplify/auth';
+import { signUp, signIn, signOut, getCurrentUser, AuthUser, fetchAuthSession, SignInOutput, SignUpOutput} from '@aws-amplify/auth';
 
 
 const authApiPrefix = 'http://localhost:8080/api/auth';
@@ -91,9 +91,34 @@ export class AuthService {
   //   );
   // }
 
-  register(firstname: string, surname: string, login: string, password: string, isSeller: boolean): Observable<User> {
-    return this.http.post<User>(`${authApiPrefix}/register`, { firstname, surname, login, password, isSeller })
+  register(firstname: string, surname: string, login: string, password: string, isSeller: boolean): Observable<any>{
+    return from(signUp({
+      username: login, 
+      password, 
+      options: {
+          userAttributes: {
+          email: login, 
+          'given_name': firstname,
+          'family_name': surname, 
+          'custom:isSeller': isSeller.toString()
+        }
+      }
+    })).pipe(
+      map((result) => {
+        console.log('User register successfully:', result);
+        return result;
+      }),
+      catchError((error) =>{
+        console.error('Registration error:', error);
+        return throwError(()=> error);
+      })
+    );
   }
+
+  
+  // register(firstname: string, surname: string, login: string, password: string, isSeller: boolean): Observable<User> {
+  //   return this.http.post<User>(`${authApiPrefix}/register`, { firstname, surname, login, password, isSeller })
+  // }
 
   getAuthHeaders(): HttpHeaders {
     const accessToken = this.getAccessToken();

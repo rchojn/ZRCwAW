@@ -34,46 +34,44 @@ export class RegisterComponent {
   }
 
   register() {
-    this.submitted = true;
-    if (!this.isPasswordValid()) {
-      this.registerErrorPassword = 'Hasło musi zawierać co najmniej jedną małą literę, jedną wielką literę, jedną cyfrę i mieć co najmniej 8 znaków.';
-      return;
-    }
-    if (!this.arePasswordsMatching()) {
-      this.registerErrorConfirmedPassword = 'Hasło i potwierdzenie hasła nie są identyczne.';
-      return;
-    }
     this.authService.register(this.firstName, this.surname, this.email, this.password, this.isSeller).subscribe({
       next: () => {
+        this.toastr.success('Rejestrcja zakończona sukcesem', 'Sukces');
         this.router.navigate(['/']);
       },
       error: (error) => {
-        if (error.status == 403) {
-          this.showError('Adres email jest już zajęty!', 'Błąd rejestracji');
-        } else {
-          this.showError('Spróbuj ponownie później.', 'Błąd rejestracji');
-        }
-        console.error('Błąd rejestracji:', error);
-      },
-      complete: () => {
-        this.showSuccess('Zarejestrowano pomyślnie', 'Sukces');
+      console.error('Bład rejestracji:', error);
+      this.toastr.error('Bład rejestracji', 'Spróbuj ponownie');
       }
     });
   }
-  showError(message: string, title: string) {
-    this.toastr.error(message, title);
-  }
-  showSuccess(message: string, title: string) {
-    this.toastr.success(message, title);
-  }
+
+
+
   goToLoginScreen() {
     this.router.navigate(['/']);
   }
-  isPasswordValid(): boolean {
-    const passwordRegex = /^(?=.*[a-ząęćłńóśźż])(?=.*[A-ZĄĘĆŁŃÓŚŹŻ])(?=.*[!@#$%^&*])[a-zA-ZąęćłńóśźżĄĘĆŁŃÓŚŹŻ\d!@#$%^&*]{8,}$/;
-    return passwordRegex.test(this.password);
+
+
+
+
+  
   }
-  arePasswordsMatching(): boolean {
-    return this.password === this.confirmPassword;
-  }
-}
+
+
+
+  // showError(message: string, title: string) {
+  //   this.toastr.error(message, title);
+  // }
+  // showSuccess(message: string, title: string) {
+  //   this.toastr.success(message, title);
+  // }
+
+  // isPasswordValid(): boolean {
+  //   const passwordRegex = /^(?=.*[a-ząęćłńóśźż])(?=.*[A-ZĄĘĆŁŃÓŚŹŻ])(?=.*[!@#$%^&*])[a-zA-ZąęćłńóśźżĄĘĆŁŃÓŚŹŻ\d!@#$%^&*]{8,}$/;
+  //   return passwordRegex.test(this.password);
+  // }
+  // arePasswordsMatching(): boolean {
+  //   return this.password === this.confirmPassword;
+//   }
+// }
