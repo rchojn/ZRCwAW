@@ -23,6 +23,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/auth")
+@CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true")
 public class AuthController {
     @Autowired
     private AuthenticationManager authenticationManager;
@@ -43,9 +44,9 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<JwtDTO> login(@RequestBody @Valid LoginDTO loginDTO){
+    public ResponseEntity<JwtDTO> login(@RequestBody @Valid LoginDTO loginDTO) {
         var usernamePassword = new UsernamePasswordAuthenticationToken(loginDTO.login(), loginDTO.password());
-        var authUser = authenticationManager.authentmicate(usernamePassword);
+        var authUser = authenticationManager.authenticate(usernamePassword);
         var accessToken = tokenProvider.generateAccessToken((User) authUser.getPrincipal());
         return ResponseEntity.ok(new JwtDTO(accessToken));
     }
@@ -53,13 +54,23 @@ public class AuthController {
     @GetMapping("/current-user")
     public ResponseEntity<User> getCurrentUser() {
         User currentUser = authService.getCurrentUser();
-        return ResponseEntity.ok(currentUser);
+        return ResponseEntity.ok()
+            .header("Access-Control-Allow-Origin", "http://localhost:4200")
+            .header("Access-Control-Allow-Methods", "*")
+            .header("Access-Control-Allow-Headers", "*")
+            .header("Access-Control-Allow-Credentials", "true")
+            .body(currentUser);
     }
+
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/users")
     public ResponseEntity<List<User>> getAllUsers() {
-        List <User> users = authService.getAllUsers();
-        return ResponseEntity.ok(users);
+        List<User> users = authService.getAllUsers();
+        return ResponseEntity.ok()
+            .header("Access-Control-Allow-Origin", "http://localhost:4200")
+            .header("Access-Control-Allow-Methods", "*")
+            .header("Access-Control-Allow-Headers", "*")
+            .header("Access-Control-Allow-Credentials", "true")
+            .body(users);
     }
-
 }

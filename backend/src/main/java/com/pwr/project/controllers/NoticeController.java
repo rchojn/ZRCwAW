@@ -17,7 +17,7 @@ import java.util.List;
 @RestController
 @AllArgsConstructor
 @RequestMapping("/api/notices")
-@CrossOrigin(origins = "http://localhost:4200")
+@CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true")
 public class NoticeController {
 
     @Autowired
@@ -27,46 +27,85 @@ public class NoticeController {
     private NoticeSearchService noticeSearchService;
 
     @PostMapping
-    public ResponseEntity<NoticeDTO> createNotice(@RequestBody NoticeDTO noticeDTO){
+    public ResponseEntity<NoticeDTO> createNotice(@RequestBody NoticeDTO noticeDTO) {
         NoticeDTO savedNotice = noticeService.createNotice(noticeDTO);
-        return new ResponseEntity<>(savedNotice, HttpStatus.CREATED);
+        return ResponseEntity.ok()
+            .header("Access-Control-Allow-Origin", "http://localhost:4200")
+            .header("Access-Control-Allow-Methods", "*")
+            .header("Access-Control-Allow-Headers", "*")
+            .header("Access-Control-Allow-Credentials", "true")
+            .body(savedNotice);
     }
 
     @GetMapping("{id}")
-    public ResponseEntity<NoticeDTO> getNoticeById(@PathVariable("id") Long noticeId){
+    public ResponseEntity<NoticeDTO> getNoticeById(@PathVariable("id") Long noticeId) {
         NoticeDTO notice = noticeService.getNoticeById(noticeId);
-        return new ResponseEntity<>(notice, HttpStatus.OK);
+        return ResponseEntity.ok()
+            .header("Access-Control-Allow-Origin", "http://localhost:4200")
+            .header("Access-Control-Allow-Methods", "*")
+            .header("Access-Control-Allow-Headers", "*")
+            .header("Access-Control-Allow-Credentials", "true")
+            .body(notice);
     }
 
     @GetMapping
-    public ResponseEntity<List<NoticeDTO>> getAllNotices(){
+    public ResponseEntity<List<NoticeDTO>> getAllNotices() {
         List<NoticeDTO> notices = noticeService.getAllNotices();
-        return new ResponseEntity<>(notices, HttpStatus.OK);
+        return ResponseEntity.ok(notices);
     }
 
     @PutMapping("{id}")
-    public ResponseEntity<String> updateNotice(@PathVariable("id") Long noticeId, @RequestBody NoticeDTO notice){
+    public ResponseEntity<String> updateNotice(@PathVariable("id") Long noticeId, @RequestBody NoticeDTO notice) {
         try {
             notice.setId(noticeId);
             NoticeDTO updatedNotice = noticeService.updateNotice(notice);
-            return new ResponseEntity<>(String.format("Notice %s has been updated successfully!", noticeId), HttpStatus.OK);
+            return ResponseEntity.ok()
+                .header("Access-Control-Allow-Origin", "http://localhost:4200")
+                .header("Access-Control-Allow-Methods", "*")
+                .header("Access-Control-Allow-Headers", "*")
+                .header("Access-Control-Allow-Credentials", "true")
+                .body(String.format("Notice %s has been updated successfully!", noticeId));
         } catch (IllegalAccessException e) {
-            return new ResponseEntity<>(String.format("You don't have right to update notice with ID: %s", noticeId), HttpStatus.UNAUTHORIZED);
-        } catch (IllegalArgumentException e){
-            return new ResponseEntity<>(String.format("Notice with ID: %s is not present in database", noticeId), HttpStatus.NOT_FOUND);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .header("Access-Control-Allow-Origin", "http://localhost:4200")
+                .header("Access-Control-Allow-Methods", "*")
+                .header("Access-Control-Allow-Headers", "*")
+                .header("Access-Control-Allow-Credentials", "true")
+                .body(String.format("You don't have right to update notice with ID: %s", noticeId));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .header("Access-Control-Allow-Origin", "http://localhost:4200")
+                .header("Access-Control-Allow-Methods", "*")
+                .header("Access-Control-Allow-Headers", "*")
+                .header("Access-Control-Allow-Credentials", "true")
+                .body(String.format("Notice with ID: %s is not present in database", noticeId));
         }
-
     }
 
     @DeleteMapping("{id}")
-    public ResponseEntity<String> deleteNotice(@PathVariable("id") Long noticeId){
+    public ResponseEntity<String> deleteNotice(@PathVariable("id") Long noticeId) {
         try {
             noticeService.deleteNotice(noticeId);
-            return new ResponseEntity<>(String.format("Notice with id: %s has been deleted succesfully!", noticeId), HttpStatus.OK);
+            return ResponseEntity.ok()
+                .header("Access-Control-Allow-Origin", "http://localhost:4200")
+                .header("Access-Control-Allow-Methods", "*")
+                .header("Access-Control-Allow-Headers", "*")
+                .header("Access-Control-Allow-Credentials", "true")
+                .body(String.format("Notice with id: %s has been deleted successfully!", noticeId));
         } catch (IllegalAccessException e) {
-            return new ResponseEntity<>(String.format("You don't have right to delete notice with id: %s", noticeId), HttpStatus.UNAUTHORIZED);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .header("Access-Control-Allow-Origin", "http://localhost:4200")
+                .header("Access-Control-Allow-Methods", "*")
+                .header("Access-Control-Allow-Headers", "*")
+                .header("Access-Control-Allow-Credentials", "true")
+                .body(String.format("You don't have right to delete notice with id: %s", noticeId));
         } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>(String.format("Notice with id: %s does not exist in database", noticeId), HttpStatus.NOT_FOUND);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .header("Access-Control-Allow-Origin", "http://localhost:4200")
+                .header("Access-Control-Allow-Methods", "*")
+                .header("Access-Control-Allow-Headers", "*")
+                .header("Access-Control-Allow-Credentials", "true")
+                .body(String.format("Notice with id: %s does not exist in database", noticeId));
         }
     }
 
@@ -76,23 +115,43 @@ public class NoticeController {
             noticeService.addFileToNotice(noticeId, file);
         }
         NoticeDTO updatedNotice = noticeService.getNoticeById(noticeId);
-        return ResponseEntity.ok(updatedNotice);
+        return ResponseEntity.ok()
+            .header("Access-Control-Allow-Origin", "http://localhost:4200")
+            .header("Access-Control-Allow-Methods", "*")
+            .header("Access-Control-Allow-Headers", "*")
+            .header("Access-Control-Allow-Credentials", "true")
+            .body(updatedNotice);
     }
 
     @GetMapping("/{noticeId}/files")
-    public ResponseEntity<List<File>> getAllFilesForNotice(@PathVariable("noticeId") Long noticeId){
+    public ResponseEntity<List<File>> getAllFilesForNotice(@PathVariable("noticeId") Long noticeId) {
         List<File> files = noticeService.getAllFiles(noticeId);
-        return new ResponseEntity<>(files, HttpStatus.OK);
+        return ResponseEntity.ok()
+            .header("Access-Control-Allow-Origin", "http://localhost:4200")
+            .header("Access-Control-Allow-Methods", "*")
+            .header("Access-Control-Allow-Headers", "*")
+            .header("Access-Control-Allow-Credentials", "true")
+            .body(files);
     }
 
     @GetMapping("/tags")
-    public ResponseEntity<List<String>> populateTags(){
+    public ResponseEntity<List<String>> populateTags() {
         List<String> tags = noticeService.getAllTags();
-        return new ResponseEntity<>(tags, HttpStatus.OK);
+        return ResponseEntity.ok()
+            .header("Access-Control-Allow-Origin", "http://localhost:4200")
+            .header("Access-Control-Allow-Methods", "*")
+            .header("Access-Control-Allow-Headers", "*")
+            .header("Access-Control-Allow-Credentials", "true")
+            .body(tags);
     }
 
     @GetMapping("/search")
     public ResponseEntity<List<Notice>> searchNotices(@RequestParam String query) {
-        return ResponseEntity.ok(noticeSearchService.searchNotices(query));
+        return ResponseEntity.ok()
+            .header("Access-Control-Allow-Origin", "http://localhost:4200")
+            .header("Access-Control-Allow-Methods", "*")
+            .header("Access-Control-Allow-Headers", "*")
+            .header("Access-Control-Allow-Credentials", "true")
+            .body(noticeSearchService.searchNotices(query));
     }
 }
