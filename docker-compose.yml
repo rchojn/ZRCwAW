@@ -17,8 +17,9 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://host.docker.internal:5432/notices_board
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgrescloud.c5w0mikaakk6.us-east-1.rds.amazonaws.com:5432/clouddb
       - SPRING_DATASOURCE_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=221001
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+      - SPRING_DATASOURCE_PASSWORD=postgres
+    network_mode: host
+    # extra_hosts:
+    #   - "host.docker.internal:host-gateway"

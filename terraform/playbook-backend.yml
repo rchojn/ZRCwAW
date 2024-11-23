@@ -1,0 +1,36 @@
+---
+- name: Configure Backend Server
+  hosts: all
+  become: true
+  tasks:
+    - name: Update and upgrade apt packages
+      apt:
+        update_cache: yes
+        upgrade: dist
+
+    - name: Install Docker
+      apt:
+        name: docker.io
+        state: present
+
+    - name: Enable and start Docker service
+      systemd:
+        name: docker
+        enabled: true
+        state: started
+
+    - name: Pull the backend Docker image
+      command: docker pull my-backend-image:latest
+
+    - name: Run the backend Docker container
+      command: >
+        docker run -d --name backend-container -p 8080:8080
+        my-backend-image:latest
+
+    - name: Verify the backend container is running
+      shell: docker ps --filter "name=backend-container"
+      register: container_status
+
+    - name: Display container status
+      debug:
+        msg: "{{ container_status.stdout }}"

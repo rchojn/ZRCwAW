@@ -1,9 +1,10 @@
 export interface User {
-    id: number;
+    id?: number;
     firstName: string;
     surname: string;
-    password: string;
+    password?: string;
     email: string;
     isSeller: boolean;
     login: string;
+    cognitoSub?: string;
 }

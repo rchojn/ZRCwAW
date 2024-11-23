@@ -13,15 +13,16 @@ import java.util.Set;
 
 @Getter
 @Setter
+@Entity
+@Table(name = "notices")
 @Builder
-@AllArgsConstructor
 @NoArgsConstructor
-@Entity(name = "Notice")
+@AllArgsConstructor
 public class Notice {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private long id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Column(nullable = false)
     private String title;
@@ -31,21 +32,16 @@ public class Notice {
 
     @JsonIgnore
     @OneToMany(mappedBy = "notice", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    @Column(nullable = true)
     private Set<File> files = new HashSet<>();
 
     @ElementCollection
-    @Column(nullable = false)
     private Set<String> tags;
 
-    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private NoticeStatus noticeStatus;
 
-    @Column(nullable = false)
     private String sellerNumber;
 
-    @Column(nullable = false)
     private String createdBy;
 
     public void addFile(File file){

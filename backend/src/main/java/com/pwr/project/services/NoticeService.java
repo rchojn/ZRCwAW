@@ -35,10 +35,10 @@ public class NoticeService {
 
     @Transactional
     public List<NoticeDTO> getAllNotices(){
-        List<Notice> notices = noticeRepository.findAllByNoticeStatusEquals(NoticeStatus.Live);
+        List<Notice> notices = noticeRepository.findByNoticeStatus(NoticeStatus.Live);
         String currentUser = getCurrentUsername();
         if (!currentUser.equals("anonymousUser")){
-            notices.addAll(noticeRepository.findAllByCreatedByAndNoticeStatusIsNot(currentUser, NoticeStatus.Live));
+            notices.addAll(noticeRepository.findByCreatedByAndNoticeStatusNot(currentUser, NoticeStatus.Live));
         }
         return notices
                 .stream()
@@ -55,7 +55,8 @@ public class NoticeService {
 
     @Transactional
     public NoticeDTO createNotice(NoticeDTO noticeDTO) {
-        User user = userRepository.findUserByLogin(getCurrentUsername());
+        User user = userRepository.findUserByLogin(getCurrentUsername())
+            .orElseThrow(() -> new RuntimeException("User not found"));
         if (!user.getIsSeller()) {
             throw new SecurityException("Uzytkownik nie jest sprzedajacym!");
         } else {
@@ -122,6 +123,15 @@ public class NoticeService {
 
     public List<String> populateTags(){
         return noticeRepository.populateTags();
+    }
+
+    public List<String> getAllTags() {
+        List<Notice> notices = noticeRepository.findAll();
+        return notices.stream()
+            .filter(notice -> notice.getTags() != null)
+            .flatMap(notice -> notice.getTags().stream())
+            .distinct()
+            .collect(Collectors.toList());
     }
 
 }

@@ -15,6 +15,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -38,12 +39,13 @@ public class AuthService implements UserDetailsService {
 
 
     @Override
-    public UserDetails loadUserByUsername(String login){
-        return userRepository.findByLogin(login);
+    public UserDetails loadUserByUsername(String login) {
+        return userRepository.findByLogin(login)
+            .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
     //toDo : ustawienie stałego hasła
     public void register(RegisterDTO registerDTO) throws InvalidJWTException {
-        if (userRepository.findByLogin(registerDTO.login()) != null){
+        if (userRepository.findByLogin(registerDTO.login()).isPresent()) {
             throw new InvalidJWTException("Username already exists");
         }
         try {
@@ -59,10 +61,28 @@ public class AuthService implements UserDetailsService {
                     .withMessageAction("SUPPRESS")
                     .withTemporaryPassword(registerDTO.password());
 
-            cognitoClient.adminCreateUser(request);
-            User newUser = new User(registerDTO.firstname(), registerDTO.surname(),registerDTO.login(), "", registerDTO.isSeller());
+            AdminCreateUserResult cognitoResult = cognitoClient.adminCreateUser(request);
+            String cognitoSub = cognitoResult.getUser().getUsername();
+
+            User newUser = User.builder()
+                    .firstName(registerDTO.firstname())
+                    .surname(registerDTO.surname())
+                    .login(registerDTO.login())
+                    .email(registerDTO.login())
+                    .isSeller(registerDTO.isSeller())
+                    .cognitoSub(cognitoSub)
+                    .build();
             System.out.println("Saving user to database: " + newUser);
             userRepository.save(newUser);
+
+            AdminSetUserPasswordRequest setPasswordRequest = new AdminSetUserPasswordRequest()
+                    .withUserPoolId(userPoolId)
+                    .withUsername(registerDTO.login())
+                    .withPassword(registerDTO.password())
+                    .withPermanent(true);
+
+            cognitoClient.adminSetUserPassword(setPasswordRequest);
+
         } catch (AWSCognitoIdentityProviderException e) {
             throw new InvalidJWTException("Error while creating user in Cognito " + e.getMessage());
         }
@@ -91,9 +111,11 @@ public class AuthService implements UserDetailsService {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (principal instanceof UserDetails) {
             String login = ((UserDetails) principal).getUsername();
-            return userRepository.findUserByLogin(login);
+            return userRepository.findUserByLogin(login)
+                .orElseThrow(() -> new RuntimeException("User not found"));
         } else if (principal instanceof String) {
-            return userRepository.findUserByLogin((String) principal);
+            return userRepository.findUserByLogin((String) principal)
+                .orElseThrow(() -> new RuntimeException("User not found"));
         }
         throw new IllegalStateException("Current user is not authenticated");
     }
@@ -126,7 +148,13 @@ public class AuthService implements UserDetailsService {
                     .map(attr -> Boolean.valueOf(attr.getValue()))
                     .orElse(false);
 
-            return new User(givenName, familyName, username, "", isSeller);
+            return User.builder()
+                    .firstName(givenName)
+                    .surname(familyName)
+                    .login(username)
+                    .email(email)
+                    .isSeller(isSeller)
+                    .build();
         }).collect(Collectors.toList());
     }
 }

@@ -23,7 +23,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "http://localhost:4200")
 public class AuthController {
     @Autowired
     private AuthenticationManager authenticationManager;
@@ -44,7 +43,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<JwtDTO> login(@RequestBody @Valid LoginDTO loginDTO){
+    public ResponseEntity<JwtDTO> login(@RequestBody @Valid LoginDTO loginDTO) {
         var usernamePassword = new UsernamePasswordAuthenticationToken(loginDTO.login(), loginDTO.password());
         var authUser = authenticationManager.authenticate(usernamePassword);
         var accessToken = tokenProvider.generateAccessToken((User) authUser.getPrincipal());
@@ -56,11 +55,11 @@ public class AuthController {
         User currentUser = authService.getCurrentUser();
         return ResponseEntity.ok(currentUser);
     }
+
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/users")
     public ResponseEntity<List<User>> getAllUsers() {
-        List <User> users = authService.getAllUsers();
+        List<User> users = authService.getAllUsers();
         return ResponseEntity.ok(users);
     }
-
 }

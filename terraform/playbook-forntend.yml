@@ -1,0 +1,36 @@
+---
+- name: Configure Frontend Server
+  hosts: all
+  become: true
+  tasks:
+    - name: Update and upgrade apt packages
+      apt:
+        update_cache: yes
+        upgrade: dist
+
+    - name: Install Docker
+      apt:
+        name: docker.io
+        state: present
+
+    - name: Enable and start Docker service
+      systemd:
+        name: docker
+        enabled: true
+        state: started
+
+    - name: Pull the frontend Docker image
+      command: docker pull my-frontend-image:latest
+
+    - name: Run the frontend Docker container
+      command: >
+        docker run -d --name frontend-container -p 4200:4200
+        my-frontend-image:latest
+
+    - name: Verify the frontend container is running
+      shell: docker ps --filter "name=frontend-container"
+      register: container_status
+
+    - name: Display container status
+      debug:
+        msg: "{{ container_status.stdout }}"
