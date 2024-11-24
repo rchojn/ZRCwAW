@@ -30,7 +30,11 @@ export class LoginComponent {
         console.error('Błąd logowania:', error);
         if (error.status === 403) {
           this.showError('Błędny login lub hasło.', 'Błąd logowania');
-        } else {
+        }
+        else if(error.status === 400)        {
+          this.showError('Brak tokenu, Bad request', 'Błąd logowania');
+        }
+        else {
           this.showError('Spróbuj ponownie później.', 'Błąd logowania')
         }
       },

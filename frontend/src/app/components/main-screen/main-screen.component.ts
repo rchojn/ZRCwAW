@@ -28,7 +28,6 @@ export class MainScreenComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadOffers();
-    // this.checkLoginSuccess();
     this.loadCurrentUser();
   }
 

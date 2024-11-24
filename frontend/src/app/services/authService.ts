@@ -3,7 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, catchError, first, from, map, Observable, of, switchMap, throwError, tap } from 'rxjs';
 import { User } from '../models/user';
 import { signUp, signIn, signOut, getCurrentUser, fetchAuthSession, fetchUserAttributes } from '@aws-amplify/auth';
-import { lastValueFrom } from 'rxjs';
+
 
 const authApiPrefix = 'http://localhost:8080/api/auth';
 
@@ -13,28 +13,59 @@ const authApiPrefix = 'http://localhost:8080/api/auth';
 export class AuthService {
   constructor(private http: HttpClient) {}
 
+
   login(email: string, password: string): Observable<any> {
     return from(signIn({ username: email, password })).pipe(
-      switchMap(async (result) => {
-        const session = await fetchAuthSession();
-        if (session.tokens?.accessToken && session.tokens?.idToken) {
-          localStorage.setItem('accessToken', session.tokens.accessToken.toString());
-          localStorage.setItem('idToken', session.tokens.idToken.toString());
+      switchMap((signInResult) => {
+        console.log('SignIn result:', signInResult); // Logowanie wyniku z signIn()
 
-          // Get user attributes from Cognito
-          const attributes = await fetchUserAttributes();
+        return from(fetchAuthSession()).pipe(
+          switchMap((session) => {
+            console.log('Fetched session:', session); // Logowanie pełnej sesji
 
-          // Sync with backend
-          await lastValueFrom(this.syncUserWithBackend(attributes));
-        }
-        return result;
+            if (session && session.tokens?.accessToken && session.tokens?.idToken) {
+              // Zapisz tokeny do localStorage
+              localStorage.setItem('accessToken', session.tokens.accessToken.toString());
+              localStorage.setItem('idToken', session.tokens.idToken.toString());
+              console.log('Access token:', session.tokens.accessToken.toString());
+              console.log('ID token:', session.tokens.idToken.toString());
+
+              // Pobierz atrybuty użytkownika
+              return from(fetchUserAttributes()).pipe(
+                switchMap((attributes) => {
+                  // Synchronizuj z backendem
+                  return this.syncUserWithBackend(attributes).pipe(
+                    catchError((backendError) => {
+                      console.error('Error syncing with backend:', backendError);
+                      return of(null); // Obsługa błędu synchronizacji
+                    })
+                  );
+                }),
+                catchError((attributesError) => {
+                  console.error('Error fetching user attributes:', attributesError);
+                  return of(null); // Obsługa błędu pobierania atrybutów
+                })
+              );
+            } else {
+              console.error('No tokens found in session');
+              return of(null); // Obsługa przypadku braku tokenów
+            }
+          }),
+          catchError((sessionError) => {
+            console.error('Error fetching auth session:', sessionError);
+            return of(null); // Obsługa błędu sesji
+          })
+        );
+      }),
+      catchError((signInError) => {
+        console.error('Error signing in:', signInError);
+        return of(null); // Obsługa błędu logowania
       })
     );
   }
 
   private syncUserWithBackend(cognitoAttributes: Record<string, any>): Observable<Partial<User>> {
     console.log('Syncing user with backend, Cognito attributes:', cognitoAttributes);
-
     const user: Partial<User> = {
       email: cognitoAttributes['email'],
       firstName: cognitoAttributes['given_name'],
@@ -151,4 +182,5 @@ export class AuthService {
   getAllUsers(): Observable<User[]> {
     return this.http.get<User[]>(`${authApiPrefix}/users`, { headers: this.getAuthHeaders() });
   }
+
 }
