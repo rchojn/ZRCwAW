@@ -19,18 +19,18 @@ public class TokenProvider {
     @Value("${security.jwt.token.secret-key}")
     private String JWT_SECRET;
 
-    public String generateAccessToken(User user){
-        try {
-            Algorithm algorithm = Algorithm.HMAC256(JWT_SECRET);
-            return JWT.create()
-                    .withSubject(user.getLogin())
-                    .withClaim("username", user.getLogin())
-                    .withExpiresAt(genAccessExpirationDate())
-                    .sign(algorithm);
-        } catch (JWTCreationException exception){
-            throw new JWTCreationException("Error while generating token", exception);
-        }
-    }
+    // public String generateAccessToken(User user){
+    //     try {
+    //         Algorithm algorithm = Algorithm.HMAC256(JWT_SECRET);
+    //         return JWT.create()
+    //                 .withSubject(user.getLogin())
+    //                 .withClaim("username", user.getLogin())
+    //                 .withExpiresAt(genAccessExpirationDate())
+    //                 .sign(algorithm);
+    //     } catch (JWTCreationException exception){
+    //         throw new JWTCreationException("Error while generating token", exception);
+    //     }
+    // }
     public String validateToken(String token){
         try{
             Algorithm algorithm = Algorithm.HMAC256(JWT_SECRET);

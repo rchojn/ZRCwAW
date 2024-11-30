@@ -4,6 +4,7 @@ import com.pwr.project.config.auth.TokenProvider;
 import com.pwr.project.dto.JwtDTO;
 import com.pwr.project.dto.LoginDTO;
 import com.pwr.project.dto.RegisterDTO;
+import com.pwr.project.dto.auth.CognitoTokenResponseDTO;
 import com.pwr.project.entities.User;
 import com.pwr.project.exceptions.InvalidJWTException;
 import com.pwr.project.repositories.UserRepository;
@@ -24,14 +25,14 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
-    @Autowired
-    private AuthenticationManager authenticationManager;
+   @Autowired
+   private AuthenticationManager authenticationManager;
 
     @Autowired
     private AuthService authService;
 
-    @Autowired
-    private TokenProvider tokenProvider;
+//    @Autowired
+//    private TokenProvider tokenProvider;
 
     @Autowired
     private UserRepository userRepository;
@@ -43,12 +44,11 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<JwtDTO> login(@RequestBody @Valid LoginDTO loginDTO) {
-        var usernamePassword = new UsernamePasswordAuthenticationToken(loginDTO.login(), loginDTO.password());
-        var authUser = authenticationManager.authenticate(usernamePassword);
-        var accessToken = tokenProvider.generateAccessToken((User) authUser.getPrincipal());
-        return ResponseEntity.ok(new JwtDTO(accessToken));
+    public ResponseEntity<?> login(@RequestBody @Valid LoginDTO loginDTO) throws InvalidJWTException {
+        JwtDTO jwtDTO = authService.login(loginDTO);
+        return ResponseEntity.ok(jwtDTO);
     }
+
 
     @GetMapping("/current-user")
     public ResponseEntity<User> getCurrentUser() {

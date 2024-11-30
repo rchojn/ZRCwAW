@@ -1,5 +1,5 @@
 package com.pwr.project.dto;
 
 public record JwtDTO(
-        String accessToken
+        String token
 ) {}

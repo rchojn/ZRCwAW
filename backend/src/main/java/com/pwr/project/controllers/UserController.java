@@ -21,16 +21,35 @@ public class UserController {
     public ResponseEntity<User> syncUser(@RequestBody User user) {
         log.info("Received sync-user request for email: {}", user.getEmail());
         try {
-            log.debug("User details: firstName={}, surname={}, isSeller={}",
-                user.getFirstName(), user.getSurname(), user.getIsSeller());
+        
+            User existingUser = userRepository.findByCognitoSub(user.getCognitoSub()).orElse(null);
 
-            User savedUser = userRepository.save(user);
-            log.info("Successfully saved user with ID: {}", savedUser.getId());
+            if (existingUser != null){
+                log.info("Updating existing user with cognitoSub: {}", user.getCognitoSub());
 
-            return ResponseEntity.ok(savedUser);
-        } catch (Exception e) {
-            log.error("Error syncing user: ", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+                existingUser.setEmail(user.getEmail());
+                existingUser.setFirstName(user.getFirstName());
+                existingUser.setSurname(user.getSurname());
+                existingUser.setSeller(user.getIsSeller());
+                return ResponseEntity.ok(userRepository.save(existingUser));
+            }
+            log.info("Creating new user with cognitoSub: {}", user.getCognitoSub());
+            return ResponseEntity.ok(userRepository.save(user));
+    } catch (Exception e){
+        log.error("Error synicnig user: ", e);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
+    }
+        //     log.debug("User details: firstName={}, surname={}, isSeller={}",
+        //         user.getFirstName(), user.getSurname(), user.getIsSeller());
+
+        //     User savedUser = userRepository.save(user);
+        //     log.info("Successfully saved user with ID: {}", savedUser.getId());
+
+        //     return ResponseEntity.ok(savedUser);
+        // } catch (Exception e) {
+        //     log.error("Error syncing user: ", e);
+        //     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        // }
+
 }
