@@ -1,0 +1,9 @@
+{
+  "Auth": {
+    "Cognito": {
+      "userPoolId": "us-east-1_OMPIqfVaW",
+      "userPoolClientId": "59idbtnj82biv9ii6n6n8rhb2t",
+      "region": "us-east-1"
+    }
+  }
+}

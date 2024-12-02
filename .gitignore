@@ -1,0 +1,35 @@
+# Build artifacts
+frontend/dist/
+frontend/.angular/cache/
+frontend/node_modules/
+backend/target/
+backend/.target/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Logs
+*.log
+
+# Environment variables
+.env
+.env.local
+
+# Dependencies
+frontend/node_modules/
+
+# Compiled output
+frontend/dist/
+frontend/build/
+frontend/out/
+backend/build/
+
+# Cache
+frontend/.angular/cache/
+frontend/.sass-cache/
+
+# System files
+.DS_Store
+Thumbs.db

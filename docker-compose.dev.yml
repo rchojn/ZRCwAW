@@ -23,16 +23,19 @@ services:
       - ~/.m2:/root/.m2
     environment:
       - SPRING_PROFILES_ACTIVE=dev
-
-  db-dev:
-    image: postgres:15-alpine
-    network_mode: "host"
-    environment:
-      - POSTGRES_DB=notices_board
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-    volumes:
-      - postgres_data_dev:/var/lib/postgresql/data
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgrescloud.c5w0mikaakk6.us-east-1.rds.amazonaws.com:5432/postgres
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+  # db-dev:
+    # image: postgres:15-alpine
+    # network_mode: "host"
+    # environment:
+    #   - POSTGRES_DB=notices_board
+    #   - POSTGRES_USER=postgres
+    #   - POSTGRES_PASSWORD=postgres
+    # volumes:
+    #   - postgres_data_dev:/var/lib/postgresql/data
 
 volumes:
   postgres_data_dev:
+  angular_cache:
